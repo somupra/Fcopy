@@ -12,7 +12,7 @@
                         exit(-1);\
                     }while(0);
 
-#define SIZE 2048
+#define SIZE 4096
 
 typedef struct{
     unsigned long start;
@@ -21,7 +21,6 @@ typedef struct{
 
 char source_name[100], target_name[100];
 
-pthread_mutex_t lock , lock1;
 
 void* overwrite(void*arg);
 void* append(void*arg);
@@ -80,8 +79,6 @@ int main(int argc, char*argv[]){
             printf("target file locked for writing\n");
 
 
-            /*initialising mutex*/
-            if(pthread_mutex_init(&lock, NULL))ERROR("Mutex initialisation has failed, program will exit\n");
 
             /*defining 3 threads to share the load of main thread*/
             pthread_t t1, t2, t3;
@@ -140,9 +137,6 @@ int main(int argc, char*argv[]){
             fcntl (fout, F_SETLKW, &targetlock);
             printf("target file locked for writing\n");
 
-            /*initialising mutex*/
-            if(pthread_mutex_init(&lock1, NULL))ERROR("Mutex initialisation has failed, program will exit\n");
-
             /*defining 3 threads to share the load of main thread*/
             pthread_t t1, t2, t3;
             pthread_create(&t1, NULL, append, &part2);
@@ -200,7 +194,6 @@ int main(int argc, char*argv[]){
 }
 
 void*overwrite(void*arg){
-    pthread_mutex_lock(&lock);
     
     int fin, fout, x, i=0;
 	partition *part;
@@ -217,11 +210,9 @@ void*overwrite(void*arg){
                 write(fout, data, x);
                 i += x;
         }
-    pthread_mutex_unlock(&lock);
 }
 
 void*append(void*arg){
-    pthread_mutex_lock(&lock1);
     
     int fin, fout, x, i=0;
 	partition *part;
@@ -238,7 +229,6 @@ void*append(void*arg){
                 write(fout, data, x);
                 i += x;
         }
-    pthread_mutex_unlock(&lock1);
 }
 
 
